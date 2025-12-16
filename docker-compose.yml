@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: hula-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: hula_root_password
+      MYSQL_DATABASE: hula_db
+      MYSQL_USER: hula_user
+      MYSQL_PASSWORD: hula_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hula-network
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: hula-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hula-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # RocketMQ NameServer
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.1.4
+    container_name: hula-rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    environment:
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+    volumes:
+      - rocketmq_namesrv_logs:/home/rocketmq/logs
+    networks:
+      - hula-network
+    restart: unless-stopped
+    command: sh mqnamesrv
+
+  # RocketMQ Broker
+  rocketmq-broker:
+    image: apache/rocketmq:5.1.4
+    container_name: hula-rocketmq-broker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    environment:
+      NAMESRV_ADDR: "rocketmq-namesrv:9876"
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+    volumes:
+      - rocketmq_broker_logs:/home/rocketmq/logs
+      - rocketmq_broker_store:/home/rocketmq/store
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      - rocketmq-namesrv
+    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-broker/conf/broker.conf
+
+  # Nacos (Service Discovery & Config Management)
+  nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: hula-nacos
+    environment:
+      MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: hula_user
+      MYSQL_SERVICE_PASSWORD: hula_password
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      JVM_XMS: 512m
+      JVM_XMX: 512m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_logs:/home/nacos/logs
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      - mysql
+
+  # RocketMQ Console (Optional - for monitoring)
+  rocketmq-console:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: hula-rocketmq-console
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: "-Xms256m -Xmx256m -Drocketmq.namesrv.addr=rocketmq-namesrv:9876"
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      - rocketmq-namesrv
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  rocketmq_namesrv_logs:
+    driver: local
+  rocketmq_broker_logs:
+    driver: local
+  rocketmq_broker_store:
+    driver: local
+  nacos_logs:
+    driver: local
+
+networks:
+  hula-network:
+    driver: bridge
