@@ -33,6 +33,7 @@ services:
   rocketmq-namesrv:
     image: apache/rocketmq:5.1.4
     container_name: hula-rocketmq-namesrv
+    platform: linux/amd64
     ports:
       - "9876:9876"
     environment:
@@ -48,6 +49,7 @@ services:
   rocketmq-broker:
     image: apache/rocketmq:5.1.4
     container_name: hula-rocketmq-broker
+    platform: linux/amd64
     ports:
       - "10909:10909"
       - "10911:10911"
@@ -67,8 +69,9 @@ services:
 
   # Nacos (Service Discovery & Config Management)
   nacos:
-    image: nacos/nacos-server:v2.3.0
+    image: nacos/nacos-server:v2.3.0-slim
     container_name: hula-nacos
+    platform: linux/amd64
     environment:
       MODE: standalone
       SPRING_DATASOURCE_PLATFORM: mysql
@@ -95,6 +98,7 @@ services:
   rocketmq-console:
     image: apacherocketmq/rocketmq-dashboard:latest
     container_name: hula-rocketmq-console
+    platform: linux/amd64
     ports:
       - "8080:8080"
     environment:
