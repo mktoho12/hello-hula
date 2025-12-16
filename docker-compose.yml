@@ -37,15 +37,16 @@ services:
 
   # RocketMQ NameServer
   rocketmq-namesrv:
-    image: apache/rocketmq:5.1.4
+    image: apache/rocketmq:5.3.1
     container_name: hula-rocketmq-namesrv
     platform: linux/amd64
     ports:
       - "9876:9876"
     environment:
-      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Duser.home=/home/rocketmq"
     volumes:
       - rocketmq_namesrv_logs:/home/rocketmq/logs
+      - rocketmq_namesrv_store:/home/rocketmq/store
     networks:
       - hula-network
     restart: unless-stopped
@@ -53,7 +54,7 @@ services:
 
   # RocketMQ Broker
   rocketmq-broker:
-    image: apache/rocketmq:5.1.4
+    image: apache/rocketmq:5.3.1
     container_name: hula-rocketmq-broker
     platform: linux/amd64
     ports:
@@ -62,7 +63,7 @@ services:
       - "10912:10912"
     environment:
       NAMESRV_ADDR: "rocketmq-namesrv:9876"
-      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Duser.home=/home/rocketmq"
     volumes:
       - rocketmq_broker_logs:/home/rocketmq/logs
       - rocketmq_broker_store:/home/rocketmq/store
@@ -123,6 +124,8 @@ volumes:
   redis_data:
     driver: local
   rocketmq_namesrv_logs:
+    driver: local
+  rocketmq_namesrv_store:
     driver: local
   rocketmq_broker_logs:
     driver: local
