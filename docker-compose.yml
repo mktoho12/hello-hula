@@ -111,6 +111,130 @@ services:
     depends_on:
       - rocketmq-namesrv
 
+  # HuLa-Server Gateway
+  hula-gateway:
+    build:
+      context: ../HuLa-Server
+      dockerfile: Dockerfile
+    image: hula-server:latest
+    container_name: hula-gateway
+    platform: linux/amd64
+    ports:
+      - "8900:8900"
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: 8848
+      NACOS_NAMESPACE: public
+      NACOS_USERNAME: nacos
+      NACOS_PASSWORD: nacos
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rocketmq-broker:
+        condition: service_started
+    command: ["/app/luohuo-gateway.jar"]
+
+  # HuLa-Server OAuth
+  hula-oauth:
+    image: hula-server:latest
+    container_name: hula-oauth
+    platform: linux/amd64
+    ports:
+      - "8910:8910"
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: 8848
+      NACOS_NAMESPACE: public
+      NACOS_USERNAME: nacos
+      NACOS_PASSWORD: nacos
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    command: ["/app/luohuo-oauth.jar"]
+
+  # HuLa-Server Base
+  hula-base:
+    image: hula-server:latest
+    container_name: hula-base
+    platform: linux/amd64
+    ports:
+      - "8920:8920"
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: 8848
+      NACOS_NAMESPACE: public
+      NACOS_USERNAME: nacos
+      NACOS_PASSWORD: nacos
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+    command: ["/app/luohuo-base.jar"]
+
+  # HuLa-Server IM
+  hula-im:
+    image: hula-server:latest
+    container_name: hula-im
+    platform: linux/amd64
+    ports:
+      - "8930:8930"
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: 8848
+      NACOS_NAMESPACE: public
+      NACOS_USERNAME: nacos
+      NACOS_PASSWORD: nacos
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
+    command: ["/app/luohuo-im.jar"]
+
+  # HuLa-Server WebSocket
+  hula-ws:
+    image: hula-server:latest
+    container_name: hula-ws
+    platform: linux/amd64
+    ports:
+      - "8940:8940"
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: 8848
+      NACOS_NAMESPACE: public
+      NACOS_USERNAME: nacos
+      NACOS_PASSWORD: nacos
+    networks:
+      - hula-network
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_started
+      rocketmq-broker:
+        condition: service_started
+    command: ["/app/luohuo-ws.jar"]
+
 volumes:
   mysql_data:
     driver: local
