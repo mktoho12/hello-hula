@@ -43,10 +43,7 @@ services:
     ports:
       - "9876:9876"
     environment:
-      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Duser.home=/home/rocketmq"
-    volumes:
-      - rocketmq_namesrv_logs:/home/rocketmq/logs
-      - rocketmq_namesrv_store:/home/rocketmq/store
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
     networks:
       - hula-network
     restart: unless-stopped
@@ -63,17 +60,13 @@ services:
       - "10912:10912"
     environment:
       NAMESRV_ADDR: "rocketmq-namesrv:9876"
-      JAVA_OPT_EXT: "-Xms512m -Xmx512m -Duser.home=/home/rocketmq"
-    volumes:
-      - rocketmq_broker_logs:/home/rocketmq/logs
-      - rocketmq_broker_store:/home/rocketmq/store
-      - ./rocketmq-broker-conf/broker.conf:/home/rocketmq/broker.conf
+      JAVA_OPT_EXT: "-Xms512m -Xmx512m"
     networks:
       - hula-network
     restart: unless-stopped
     depends_on:
       - rocketmq-namesrv
-    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/broker.conf
+    command: sh mqbroker -n rocketmq-namesrv:9876 autoCreateTopicEnable=true
 
   # Nacos (Service Discovery & Config Management)
   nacos:
@@ -122,14 +115,6 @@ volumes:
   mysql_data:
     driver: local
   redis_data:
-    driver: local
-  rocketmq_namesrv_logs:
-    driver: local
-  rocketmq_namesrv_store:
-    driver: local
-  rocketmq_broker_logs:
-    driver: local
-  rocketmq_broker_store:
     driver: local
   nacos_logs:
     driver: local
