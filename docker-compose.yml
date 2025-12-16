@@ -65,7 +65,7 @@ services:
     restart: unless-stopped
     depends_on:
       - rocketmq-namesrv
-    command: sh mqbroker -n rocketmq-namesrv:9876 -c /home/rocketmq/rocketmq-broker/conf/broker.conf
+    command: sh mqbroker -n rocketmq-namesrv:9876
 
   # Nacos (Service Discovery & Config Management)
   nacos:
