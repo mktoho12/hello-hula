@@ -1,0 +1,19 @@
+luohuo:
+  cache:
+    type: REDIS
+    serializer-type: JACK_SON
+  redis:
+    ip: redis
+    port: 6379
+    password: ''
+    database: 0
+spring:
+  cache:
+    type: GENERIC
+  data:  
+    redis:
+      host: ${luohuo.redis.ip}
+      password: ${luohuo.redis.password}
+      port: ${luohuo.redis.port}
+      database: ${luohuo.redis.database}
+
