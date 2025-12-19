@@ -137,6 +137,10 @@ MySQLが完全に起動する前にNacosが起動しようとする場合があ�
 docker-compose restart nacos
 ```
 
+## コントリビューション
+
+このプロジェクトへの貢献を歓迎します！貢献方法の詳細については、[CONTRIBUTING.md](CONTRIBUTING.md)をご覧ください。
+
 ## 参考リンク
 
 - [HuLa-Server GitHub](https://github.com/HuLaSpark/HuLa-Server)
